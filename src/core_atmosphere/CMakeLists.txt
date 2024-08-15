@@ -128,6 +128,36 @@ set(ATMOSPHERE_CORE_PHYSICS_MMM_SOURCES
 
 list(TRANSFORM ATMOSPHERE_CORE_PHYSICS_MMM_SOURCES PREPEND physics/physics_mmm/)
 
+# physics/physics_ccpp
+set(ATMOSPHERE_CORE_PHYSICS_CCPP_SOURCES
+  # prereqs
+  hooks/machine.F
+  hooks/physcons.F90
+  tools/funcphys.f90
+  # saSAS modules
+  CONV/progsigma_calc.f90
+  CONV/SAMF/samfaerosols.F
+  CONV/SAMF/samfdeepcnv.f
+  CONV/SAMF/samfshalcnv.f
+  )
+list(TRANSFORM ATMOSPHERE_CORE_PHYSICS_CCPP_SOURCES PREPEND physics/physics_ccpp/physics/)
+# Set flags for fixed-form and free-form files
+foreach(source_file IN LISTS ATMOSPHERE_CORE_PHYSICS_CCPP_SOURCES)
+  if(source_file MATCHES "\\.F$" OR source_file MATCHES "\\.f$")
+    set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "-ffixed-form")
+  elseif(source_file MATCHES "\\.F90$" OR source_file MATCHES "\\.f90$")
+    set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "-ffree-form")
+  endif()
+endforeach()
+# Set the module output directory for CCPP Physics, needed since
+# ccpp's machine.mod conflicts with NoahMP's machine.mod
+add_library(atmosphere_core_physics_ccpp
+  ${ATMOSPHERE_CORE_PHYSICS_CCPP_SOURCES})
+set_target_properties(atmosphere_core_physics_ccpp PROPERTIES
+  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ccpp_physics_mods)
+target_include_directories(atmosphere_core_physics_ccpp PUBLIC
+  ${CMAKE_CURRENT_BINARY_DIR}/ccpp_physics_mods)
+
 set(ATMOSPHERE_CORE_PHYSICS_NOAMP_UTILITY_SOURCES
     CheckNanMod.F90
     ErrorHandleMod.F90
@@ -346,6 +376,7 @@ add_library(core_atmosphere ${ATMOSPHERE_CORE_SOURCES}
             ${ATMOSPHERE_CORE_PHYSICS_WRF_SOURCES}
             ${ATMOSPHERE_CORE_DIAGNOSTIC_SOURCES}
             ${ATMOSPHERE_CORE_DYNAMICS_SOURCES})
+target_link_libraries(core_atmosphere PUBLIC atmosphere_core_physics_ccpp)
 
 set(CORE_ATMOSPHERE_COMPILE_DEFINITIONS
     mpas=1
