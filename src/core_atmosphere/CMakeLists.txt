@@ -148,6 +148,7 @@ foreach(source_file IN LISTS ATMOSPHERE_CORE_PHYSICS_CCPP_SOURCES)
   elseif(source_file MATCHES "\\.F90$" OR source_file MATCHES "\\.f90$")
     set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "-ffree-form")
   endif()
+  set_source_files_properties(${source_file} PROPERTIES COMPILE_FLAGS "-fallow-argument-mismatch")
 endforeach()
 # Set the module output directory for CCPP Physics, needed since
 # ccpp's machine.mod conflicts with NoahMP's machine.mod
@@ -376,7 +377,7 @@ add_library(core_atmosphere ${ATMOSPHERE_CORE_SOURCES}
             ${ATMOSPHERE_CORE_PHYSICS_WRF_SOURCES}
             ${ATMOSPHERE_CORE_DIAGNOSTIC_SOURCES}
             ${ATMOSPHERE_CORE_DYNAMICS_SOURCES})
-target_link_libraries(core_atmosphere PUBLIC atmosphere_core_physics_ccpp)
+# target_link_libraries(core_atmosphere PUBLIC atmosphere_core_physics_ccpp)
 
 set(CORE_ATMOSPHERE_COMPILE_DEFINITIONS
     mpas=1
@@ -414,7 +415,8 @@ endforeach ()
 install(DIRECTORY ${PHYSICS_WRF_DATA_DIR}/ DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/core_atmosphere)
 
 add_executable(mpas_atmosphere_build_tables ${ATMOSPHERE_CORE_UTILS_SOURCES})
-target_link_libraries(mpas_atmosphere_build_tables PUBLIC core_atmosphere)
+target_link_libraries(mpas_atmosphere_build_tables PUBLIC core_atmosphere
+  atmosphere_core_physics_ccpp)
 mpas_fortran_target(mpas_atmosphere_build_tables)
 install(TARGETS mpas_atmosphere_build_tables EXPORT ${PROJECT_NAME}ExportsCore
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
