@@ -56,6 +56,9 @@ OBJS = \
 lookup_tables:
 	./checkout_data_files.sh
 
+core_physics_ccpp:
+	($(MAKE) -f Makefile.ccpp)
+
 core_physics_mmm: core_physics_init
 	(cd physics_mmm; $(MAKE) -f Makefile.mpas all)
 
@@ -69,9 +72,10 @@ core_physics_noahmp:
 
 core_physics_init: $(OBJS_init)
 
-core_physics: core_physics_wrf core_physics_noahmp
+core_physics: core_physics_wrf core_physics_noahmp core_physics_ccpp
 	($(MAKE) phys_interface COREDEF="$(COREDEF)")
 	ar -ru libphys.a $(OBJS_init) $(OBJS)
+	($(MAKE) -f Makefile.ccpp physics_ccpp_lib)
 	($(MAKE) -C ./physics_mmm -f Makefile.mpas physics_mmm_lib)
 	($(MAKE) -C ./physics_wrf physics_wrf_lib)
 	($(MAKE) -C ./physics_noahmp/drivers/mpas driver_lib)
@@ -243,6 +247,7 @@ clean:
 	( cd physics_noahmp/drivers/mpas; $(MAKE) clean )
 	( cd physics_noahmp/src; $(MAKE) clean )
 	( cd physics_noahmp/utility; $(MAKE) clean )
+	( $(MAKE) -f Makefile.ccpp clean)
 	@# Certain systems with intel compilers generate *.i files
 	@# This removes them during the clean process
 	$(RM) *.i

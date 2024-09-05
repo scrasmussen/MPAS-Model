@@ -1,0 +1,99 @@
+# Fixed form flags
+ifeq ($(FC_SERIAL), gfortran)
+FIXED=-ffixed-form
+endif
+ifeq ($(FC_SERIAL), xlf2003_r)
+FIXED=-qfixed
+endif
+ifeq ($(FC_SERIAL), xlf90_r)
+FIXED=-qfixed
+endif
+ifeq ($(FC_SERIAL), ftn)
+FIXED=-fixed
+endif
+ifeq ($(FC_SERIAL), nvfortran)
+FIXED=-Mfixed
+endif
+ifeq ($(FC_SERIAL), pgf90)
+FIXED=-Mfixed
+endif
+ifeq ($(FC_SERIAL), ifort)
+FIXED=-fixed
+endif
+ifeq ($(FC_SERIAL), flang)
+FIXED=-Mfixed
+endif
+ifeq ($(FC_SERIAL), nagfor)
+FIXED=-fixed
+endif
+ifeq ($(FC_SERIAL), ifx)
+FIXED=-fixed
+endif
+
+# Directories
+SRC_DIR := physics_ccpp/physics
+CONV_DIR := $(SRC_DIR)/CONV/SAMF
+HOOKS_DIR := $(SRC_DIR)/hooks
+TOOLS_DIR := $(SRC_DIR)/tools
+CONV_PROG_DIR := $(SRC_DIR)/CONV
+
+OBJS := \
+    $(HOOKS_DIR)/machine.o \
+    $(HOOKS_DIR)/physcons.o \
+    $(TOOLS_DIR)/funcphys.o \
+    $(CONV_PROG_DIR)/progsigma_calc.o \
+    $(CONV_DIR)/samfaerosols.o \
+    $(CONV_DIR)/samfdeepcnv.o \
+    $(CONV_DIR)/samfshalcnv.o
+
+all: message physics_ccpp
+
+message:
+	@echo "****** compiling physics_ccpp ******"
+
+physics_ccpp: $(OBJS)
+
+physics_ccpp_lib: $(OBJS)
+	ar -ru ./libphys.a $(OBJS)
+
+clean:
+	$(RM) libphys.a
+	$(RM) $(HOOKS_DIR)/*.o $(TOOLS_DIR)/*.o
+	$(RM) $(CONV_DIR)/*.o $(CONV_PROG_DIR)/*.o
+	$(RM) $(HOOKS_DIR)/*.mod $(TOOLS_DIR)/*.mod
+	$(RM) $(CONV_DIR)/*.mod $(CONV_PROG_DIR)/*.mod
+	$(RM) $(HOOKS_DIR)/*.i $(TOOLS_DIR)/*.i
+	$(RM) $(CONV_DIR)/*.i $(CONV_PROG_DIR_DIR)/*.i
+	$(RM) *.o *.mod *.i
+
+$(HOOKS_DIR)/machine.o:
+$(HOOKS_DIR)/physcons.o: \
+	$(HOOKS_DIR)/machine.o
+$(TOOLS_DIR)/funcphys.o: \
+        $(HOOKS_DIR)/machine.o \
+	$(HOOKS_DIR)/physcons.o
+$(CONV_PROG_DIR)/progsigma_calc.o: \
+	$(HOOKS_DIR)/machine.o \
+	$(TOOLS_DIR)/funcphys.o
+$(CONV_DIR)/samfaerosols.o: \
+	$(HOOKS_DIR)/machine.o \
+	$(HOOKS_DIR)/physcons.o
+$(CONV_DIR)/samfdeepcnv.o: \
+	$(HOOKS_DIR)/machine.o \
+	$(TOOLS_DIR)/funcphys.o \
+	$(CONV_DIR)/samfaerosols.o \
+	$(CONV_PROG_DIR)/progsigma_calc.o
+$(CONV_DIR)/samfshalcnv.o: \
+	$(HOOKS_DIR)/machine.o \
+	$(TOOLS_DIR)/funcphys.o \
+	$(CONV_DIR)/samfaerosols.o \
+	$(CONV_PROG_DIR)/progsigma_calc.o
+
+%.o: %.f
+	$(FC) $(FFLAGS) $(FIXED) -c $< -o $@
+%.o: %.f90
+	$(FC) $(FFLAGS) -c $< -o $@
+%.o: %.F
+	$(FC) $(FFLAGS) $(FIXED) -c $< -o $@
+%.o: %.F90
+	$(FC) $(FFLAGS) -c $< -o $@
