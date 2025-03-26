@@ -1540,6 +1540,7 @@ mpas_hydro:
 	$(info "Adding MPAS-Hydro")
 	@if [ ! -f build_hydro/CMakeCache.txt ]; then \
 	cmake -S src/mpas_hydro -B build_hydro \
+		-DMPAS-Hydro=ON \
 		-DCMAKE_Fortran_COMPILER=$(FC) \
 		-DCMAKE_C_COMPILER=$(CC) \
 		-DCMAKE_CXX_COMPILER=$(CXX) \
