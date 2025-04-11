@@ -29,6 +29,7 @@ gnu:   # BUILDTARGET GNU Fortran, C, and C++ compilers
 	"FFLAGS_ACC =" \
 	"CFLAGS_ACC =" \
 	"PICFLAG = -fPIC" \
+	"MPAS_ATM_NUOPC=$(MPAS_ATM_NUOPC)" \
 	"BUILD_TARGET = $(@)" \
 	"CORE = $(CORE)" \
 	"DEBUG = $(DEBUG)" \
@@ -799,6 +800,8 @@ endif
 	LIBS += -L$(PNETCDF)/$(PNETCDFLIBLOC) -lpnetcdf
 endif
 
+LIBS += -I${NCAR_ROOT_OPENBLAS}/lib -lopenblas
+
 ifneq "$(LAPACK)" ""
         LIBS += -L$(LAPACK)
         LIBS += -llapack
@@ -1532,8 +1535,11 @@ MAIN_DEPS = rebuild_check openmp_test openacc_test pnetcdf_test mpi_f08_test
 IO_MESSAGE = "Using the SMIOL library."
 override CPPFLAGS += "-DMPAS_SMIOL_SUPPORT"
 endif
+MPAS_ATM_NUOPC=
 ifneq (,$(filter true 1,$(MPAS_HYDRO)))
   MAIN_DEPS += mpas_hydro
+  MPAS_ATM_NUOPC = mpas_atm_nuopc
+  HYDRO_MESSAGE = "MPAS-Hydro was built with NUOPC"
 endif
 
 mpas_hydro:
@@ -1585,6 +1591,7 @@ mpas_main: $(MAIN_DEPS)
                  CPPINCLUDES="$(CPPINCLUDES)" \
                  FCINCLUDES="$(FCINCLUDES)" \
                  CORE="$(CORE)"\
+                 MPAS_ATM_NUOPC="$(MPAS_ATM_NUOPC)"\
                  AUTOCLEAN="$(AUTOCLEAN)" \
                  AUTOCLEAN_DEPS="$(AUTOCLEAN_DEPS)" \
                  GEN_F90="$(GEN_F90)" \
@@ -1606,6 +1613,7 @@ mpas_main: $(MAIN_DEPS)
 	@echo $(MUSICA_MESSAGE)
 	@echo $(SCOTCH_MESSAGE)
 	@echo $(SHAREDLIB_MESSAGE)
+	@echo $(HYDRO_MESSAGE)
 ifeq "$(AUTOCLEAN)" "true"
 	@echo $(AUTOCLEAN_MESSAGE)
 endif
