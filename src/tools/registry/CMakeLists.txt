@@ -3,6 +3,21 @@
 add_library(parselib dictionary.c fortprintf.c utility.c)
 target_link_libraries(parselib PUBLIC ${PROJECT_NAME}::external::ezxml)
 target_link_libraries(parselib PUBLIC ${PROJECT_NAME}::external::esmf)
+if(MPAS_USE_PIO)
+  # target_link_libraries(parselib PUBLIC piof)
+  target_link_libraries(parselib PUBLIC
+    piof
+    PIO::PIO_C
+    PIO::PIO_Fortran
+    )
+
+  # Tell consumers where headers are
+  target_include_directories(parselib PUBLIC "${PIO_INCLUDE_DIR}")
+
+  # Link the actual .so path (not “-lPIO”)
+  target_link_libraries(parselib PUBLIC "${PIO_C_SHARED_LIB}")
+  # target_link_libraries(parselib PUBLIC PIO::PIOf)
+endif()
 
 # Generate parser for each core
 #
