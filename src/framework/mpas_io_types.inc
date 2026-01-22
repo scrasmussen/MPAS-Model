@@ -15,7 +15,7 @@
 #endif
 
    ! File access modes
-   integer, parameter :: MPAS_IO_READ  = 1, &
+integer, parameter :: MPAS_IO_READ  = 1, &
                          MPAS_IO_WRITE = 2
 
    ! I/O formats

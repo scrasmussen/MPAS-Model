@@ -51,7 +51,7 @@ module mpas_subdriver
       use mpas_bootstrapping, only : mpas_bootstrap_framework_phase1, mpas_bootstrap_framework_phase2
       use mpas_log
       use mpas_stream_inquiry, only : MPAS_stream_inquiry_new_streaminfo
- 
+
       implicit none
 
       type (core_type), intent(inout), pointer :: corelist
@@ -382,6 +382,7 @@ module mpas_subdriver
       if ( ierr /= MPAS_STREAM_MGR_NOERR ) then
          call mpas_dmpar_global_abort('ERROR: Validation of streams failed for core ' // trim(domain_ptr % core % coreName))
       end if
+      ! FOO ADD
 
       !
       ! Finalize the setup of blocks and fields
@@ -509,7 +510,7 @@ module mpas_subdriver
       else
           write(histAtt, '(A,I6,A,A,A)') 'mpirun -n ', domain % dminfo % nProcs, ' ./', trim(domain % core % coreName), '_model'
       end if
-     
+
       call MPAS_stream_mgr_add_att(domain % streamManager, 'model_name', domain % core % modelName)
       call MPAS_stream_mgr_add_att(domain % streamManager, 'core_name', domain % core % coreName)
       call MPAS_stream_mgr_add_att(domain % streamManager, 'version', domain % core % modelVersion)

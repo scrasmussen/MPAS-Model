@@ -314,7 +314,7 @@ int par_read(char *fname, int *mpi_comm, char **xml_buf, size_t *bufsize)
 #ifdef _MPI
 		err = MPI_Bcast((void *)bufsize, (int)sizeof(size_t), MPI_BYTE, 0, comm);
 #endif
-	
+
 		*xml_buf = (char *)malloc(*bufsize);
 		err = read(iofd, (void *)(*xml_buf), *bufsize);
 
@@ -452,7 +452,7 @@ int attribute_check(ezxml_t stream)
 				fmt_err(msgbuf);
 				return 1;
 			}
-		}	
+		}
 	}
 
 	return 0;
@@ -521,7 +521,7 @@ int check_streams(ezxml_t streams)
 	for (stream_xml = ezxml_child(streams, "immutable_stream"); stream_xml; stream_xml = ezxml_next(stream_xml)) {
 		if (attribute_check(stream_xml) != 0) {
 			return 1;
-		}	
+		}
 
 		/* Check that users are not attempting to add fields to an immutable stream */
 		test_xml = ezxml_child(stream_xml, "var");
@@ -540,7 +540,7 @@ int check_streams(ezxml_t streams)
 
 		if (attribute_check(stream_xml) != 0) {
 			return 1;
-		}	
+		}
 
 		/* If fields are specified in a separate file, that file should exist */
 		for (test_xml = ezxml_child(stream_xml, "file"); test_xml; test_xml = ezxml_next(test_xml)) {
@@ -573,7 +573,7 @@ int check_streams(ezxml_t streams)
 		}
 	}
 
-	return 0;	
+	return 0;
 }
 
 
@@ -740,7 +740,7 @@ int xml_syntax_check(char *xml_buf, size_t bufsize)
 
 					while ((node = pop_tag()) != NULL)
 						free(node);
-					return 1;	
+					return 1;
 				}
 				free(node);
 			}
@@ -751,7 +751,7 @@ int xml_syntax_check(char *xml_buf, size_t bufsize)
 			}
 			/* Probable syntax error? */
 			else {
-				
+
 			}
 
 		}
@@ -763,10 +763,10 @@ int xml_syntax_check(char *xml_buf, size_t bufsize)
 	if (node != NULL) {
 		snprintf(msgbuf, MSGSIZE, "line %i, unclosed or badly nested XML tag \"%s\".", node->line, node->name);
 		fmt_err(msgbuf);
-		
+
 		while ((node = pop_tag()) != NULL)
 			free(node);
-		return 1;	
+		return 1;
 	}
 
 	free(tag_buf);
@@ -850,7 +850,7 @@ int build_stream_path(const char *stream, const char *template, int *mpi_comm)
 #ifdef _MPI
 							err = MPI_Bcast(&retval, 1, MPI_INT, 0, comm);
 #endif
-							return retval;						
+							return retval;
 						}
 					}
 				}
@@ -867,7 +867,7 @@ int build_stream_path(const char *stream, const char *template, int *mpi_comm)
 					fmt_err(msgbuf);
 					free(filename_path);
 					free(directory);
-	
+
 					retval = 1;
 #ifdef _MPI
 					err = MPI_Bcast(&retval, 1, MPI_INT, 0, comm);
@@ -886,7 +886,7 @@ int build_stream_path(const char *stream, const char *template, int *mpi_comm)
 #ifdef _MPI
 					err = MPI_Bcast(&retval, 1, MPI_INT, 0, comm);
 #endif
-					return retval;						
+					return retval;
 			}
 		}
 
@@ -916,18 +916,18 @@ int build_stream_path(const char *stream, const char *template, int *mpi_comm)
  *
  *  Function: extract_stream_interval
  *
- *  Given an interval specification for a stream (interval) that references 
- *  an interval in another stream (e.g., "stream:history:output_interval"), and 
- *  an interval type (interval_type, either "input_interval" or "output_interval"), 
- *  extracts the value of the interval from the other stream and returns it in 
+ *  Given an interval specification for a stream (interval) that references
+ *  an interval in another stream (e.g., "stream:history:output_interval"), and
+ *  an interval type (interval_type, either "input_interval" or "output_interval"),
+ *  extracts the value of the interval from the other stream and returns it in
  *  the output argument interval2.
  *
- *  If the interval specification in the interval argument does not reference 
- *  another stream, the contents of interval2 are unchanged upon return from 
+ *  If the interval specification in the interval argument does not reference
+ *  another stream, the contents of interval2 are unchanged upon return from
  *  this function.
  *
- *  In case the input interval references an interval in another stream and this 
- *  interval cannot found, this function returns a value of 1; otherwise, this 
+ *  In case the input interval references an interval in another stream and this
+ *  interval cannot found, this function returns a value of 1; otherwise, this
  *  function returns 0.
  *
  *********************************************************************************/
@@ -1000,7 +1000,7 @@ int extract_stream_interval(const char *interval, const char *interval_type, con
 
 		if ( stream_found == 1 ) {
 			*interval2 = ezxml_attr(streammatch_xml, interval_name);
-		} 
+		}
 		else {
 			snprintf(msgbuf, MSGSIZE, "The '%s' attribute of stream '%s' refers to an undefined stream named '%s'.", interval_type, streamID, match_stream_name);
 			mpas_log_write_c(msgbuf, "MPAS_LOG_ERR");
@@ -1012,7 +1012,7 @@ int extract_stream_interval(const char *interval, const char *interval_type, con
 			snprintf(msgbuf, MSGSIZE, "The '%s' attribute of stream '%s' refers to an undefined attribute named '%s' of stream '%s'.", interval_type, streamID, interval_name, match_stream_name);
 			mpas_log_write_c(msgbuf, "MPAS_LOG_ERR");
 			return 1;
-		} 
+		}
 		else if ( strcmp(*interval2, "input_interval") == 0 || strcmp(*interval2, "output_interval") == 0 || strncmp(*interval2, "stream:", 7) == 0 ) {
 			snprintf(msgbuf, MSGSIZE, "The '%s' attribute of stream '%s' contains an unexpandable value: '%s'.", interval_type, streamID, *interval2);
 			mpas_log_write_c(msgbuf, "MPAS_LOG_ERR");
@@ -1094,7 +1094,7 @@ void xml_stream_parser(char *fname, void *manager, int *mpi_comm, int *status)
 		mpas_log_write_c(msgbuf, "MPAS_LOG_ERR");
 		*status = 1;
 		return;
-	}	
+	}
 
 	err = 0;
 
@@ -1896,7 +1896,7 @@ void xml_stream_get_attributes(char *fname, char *streamname, int *mpi_comm, cha
 		mpas_log_write_c(msgbuf, "MPAS_LOG_ERR");
 		*status = 1;
 		return;
-	}	
+	}
 
 	if (check_streams(streams) != 0) {
 		*status = 1;
