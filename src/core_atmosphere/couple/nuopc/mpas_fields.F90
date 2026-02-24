@@ -585,6 +585,7 @@ contains
          call mpas_pool_get_subpool(block%structs,'sfc_input', sfc_input)
          call mpas_pool_get_array(sfc_input,'sh2o', sh2o )
          mpas_noahmp%sh2o1_buf(:) = sh2o(1, mpas_noahmp%its:mpas_noahmp%ite)
+         ! mpas_noahmp%sh2o1_buf(:) = 0.0
          field = ESMF_FieldCreate(name=fld_name, mesh=mesh, &
               meshloc=ESMF_MESHLOC_ELEMENT, &
               farray=mpas_noahmp%sh2o1_buf(:), &
@@ -595,6 +596,7 @@ contains
          call mpas_pool_get_subpool(block%structs,'sfc_input', sfc_input)
          call mpas_pool_get_array(sfc_input,'sh2o', sh2o )
          mpas_noahmp%sh2o2_buf(:) = sh2o(2, mpas_noahmp%its:mpas_noahmp%ite)
+         ! mpas_noahmp%sh2o2_buf(:) = 0
          field = ESMF_FieldCreate(name=fld_name, mesh=mesh, &
               meshloc=ESMF_MESHLOC_ELEMENT, &
               farray=mpas_noahmp%sh2o2_buf(:), &
@@ -605,6 +607,7 @@ contains
          call mpas_pool_get_subpool(block%structs,'sfc_input', sfc_input)
          call mpas_pool_get_array(sfc_input,'sh2o', sh2o )
          mpas_noahmp%sh2o3_buf(:) = sh2o(3, mpas_noahmp%its:mpas_noahmp%ite)
+         ! mpas_noahmp%sh2o3_buf(:) = 0
          field = ESMF_FieldCreate(name=fld_name, mesh=mesh, &
               meshloc=ESMF_MESHLOC_ELEMENT, &
               farray=mpas_noahmp%sh2o3_buf(:), &
@@ -615,6 +618,7 @@ contains
          call mpas_pool_get_subpool(block%structs,'sfc_input', sfc_input)
          call mpas_pool_get_array(sfc_input,'sh2o', sh2o )
          mpas_noahmp%sh2o4_buf(:) = sh2o(4, mpas_noahmp%its:mpas_noahmp%ite)
+         mpas_noahmp%sh2o4_buf(:) = 0
          field = ESMF_FieldCreate(name=fld_name, mesh=mesh, &
               meshloc=ESMF_MESHLOC_ELEMENT, &
               farray=mpas_noahmp%sh2o4_buf(:), &

@@ -156,9 +156,9 @@ contains
     call MPI_Initialized(flag, ierr)
 
     if (flag .eqv. .true.) then
-       print *, "✅ MPI is already initialized."
+       print *, "MPI is already initialized."
     else
-       print *, "❌ MPI is NOT initialized."
+       print *, "MPI is NOT initialized."
     end if
 
     call ESMF_LogWrite("MPAS: calling mpas_init", ESMF_LOGMSG_INFO, rc=rc)
@@ -178,15 +178,8 @@ contains
     call ESMF_LogFlush(rc=rc)
 
 
-    ! print *, "return from advertise early: no meshes"
-    ! return
-
-    ! not use this anymore
+    ! not using this anymore, can remove subroutine from codebase
     ! call hydroWeightGeneration()
-
-
-    ! mpas_grid = gridCreate(is%wrap%did,rc=rc)
-    ! mpas_grid = gridCreate(rc=rc)
 
     call NUOPC_ModelGet(model, importState=importState, &
          exportState=exportState, rc=rc)
@@ -198,23 +191,11 @@ contains
     if (check(rc, __LINE__, file)) return
     call advertise_fields(model, field_list, importState, exportState, rc=rc)
     if (check(rc, __LINE__, file)) return
-    ! call advertise_fields(field_list, importState, exportState, rc=rc)
-    ! Get variables from MPAS
-    ! real, pointer :: qrainxy(:)
-    ! call mpas_pool_get_array( domain%diag, 'qrainxy', qrainxy )
-    ! call NUOPC_AdvertiseField(exportState, fieldPtr, &
-    !      standardName = "precipitation_flux", &
-    !      name         = "qrainxy", &
-    !      units        = "kg m-2 s-1", &
-    !      rc           = rc)
-
 
     call ESMF_StateLog(exportState, logMsgFlag=ESMF_LOGMSG_INFO, rc=rc)
-    call ESMF_StateLog(importState, logMsgFlag=ESMF_LOGMSG_INFO, rc=rc)
-
-
     if (check(rc, __LINE__, file)) return
-
+    call ESMF_StateLog(importState, logMsgFlag=ESMF_LOGMSG_INFO, rc=rc)
+    if (check(rc, __LINE__, file)) return
 
     print *, "MPAS: Exiting Advertise"
     call ESMF_LogWrite("MPAS: exiting Advertise", ESMF_LOGMSG_INFO, rc=rc)
@@ -250,23 +231,14 @@ contains
 
     call ESMF_LogWrite("MPAS: entering Realize", ESMF_LOGMSG_INFO, rc=rc)
 
-
-
-
     call NUOPC_ModelGet(model, importState=importState, &
          exportState=exportState, rc=rc)
     if (check(rc, __LINE__, file)) return
 
 
-    ! stop "MPAS: realize, stopping early"
-
-    ! print *, "realize nothing"
     field_list = get_field_list()
     call realize_fields(model, domain, field_list, importState, exportState, &
          realizeAllImport=.false., realizeAllExport=.true., rc=rc)
-
-    ! works
-
 
     ! ! create Grid objects for Fields
     ! gridIn = ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/100, 20/), &
