@@ -40,5 +40,3 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
         PATTERN "CMakeFiles" EXCLUDE
 )
 install(EXPORT mpas_atm_nuopc-config DESTINATION lib/cmake)
-
-# message(FATAL_ERROR "BUILDING MPAS_ATM_NUOPC")
