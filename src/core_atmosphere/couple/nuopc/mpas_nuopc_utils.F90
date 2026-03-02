@@ -7,33 +7,6 @@ module mpas_nuopc_utils
   logical, parameter :: debug = .false.
 
 contains
-  subroutine hydroWeightGeneration()
-    type(ESMF_Mesh) :: mesh, grid
-    integer :: rc
-    character(:), allocatable :: mesh_file, weight_file
-    rc = ESMF_SUCCESS
-    error stop "this is dead code"
-
-    ! mesh_file = "x1.40962.esmf.nc"
-    mesh_file = "frontrange.scrip.nc"
-    mesh = ESMF_MeshCreate(filename=mesh_file, &
-         fileformat=ESMF_FILEFORMAT_ESMFMESH, rc=rc)
-    if (check(rc, __LINE__, file)) return
-    print *, "Read in mesh file: ", mesh_file
-
-    ! grid = ESMF.Grid(filename="wrfhydro_grid.nc", &
-    !      filetype=ESMF.FileFormat.SCRIP, rc=rc)
-    ! if (check(rc, __LINE__, file)) return
-    ! print *, "Read in WRF-Hydro grid: ", mesh_file
-
-    ! weight_file = "foo_weight.nc"
-    ! call ESMF_RegridWeightGen(srcFile=mesh, dstFile=grid, &
-    !      weightFile=weight_file, &
-    !      srcFileType=ESMF_FILEFORMAT_ESMFMESH, &
-    !      dstFileType=ESMF_FILEFORMAT_UGRID, &
-    !      weightOnlyFlag=.true., verboseFlag=.true.)
-  end subroutine hydroWeightGeneration
-
   function gridCreate(rc) result(grid)
     integer, intent(out) :: rc
     type(ESMF_Grid) :: grid
@@ -148,7 +121,6 @@ contains
 
     ! Reading in mesh file after converting frontrange.grid.nc to scrip format
     ! mpas-dev.github.io/MPAS-Tools/0.24.0/_modules/mpas_tools/scrip/from_mpas.html
-
     mesh_file = "frontrange.scrip.nc"
     print *, "todo: read mesh_file name from namelist, currently ", trim(mesh_file)
     mesh = ESMF_MeshCreate(filename=mesh_file, &

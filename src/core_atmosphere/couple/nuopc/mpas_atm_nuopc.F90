@@ -5,7 +5,7 @@ module mpas_atm_nuopc
        mpas_pool_type, mpas_time_type
   use mpas_kind_types, only: rkind, r8kind, strkind
   use mpas_nuopc_utils, only: check, printa, gridCreate, &
-       hydroWeightGeneration, create_esmf_mesh
+       create_esmf_mesh
   use mpas_subdriver, only: mpas_init, mpas_run, mpas_finalize
   use atm_core, only: atm_core_run_start, atm_core_run_advance
   use esmf
@@ -177,9 +177,6 @@ contains
     call ESMF_LogWrite("MPAS: finished mpas_init", ESMF_LOGMSG_INFO, rc=rc)
     call ESMF_LogFlush(rc=rc)
 
-
-    ! not using this anymore, can remove subroutine from codebase
-    ! call hydroWeightGeneration()
 
     call NUOPC_ModelGet(model, importState=importState, &
          exportState=exportState, rc=rc)
