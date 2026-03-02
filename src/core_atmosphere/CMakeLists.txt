@@ -427,6 +427,6 @@ install(TARGETS mpas_atmosphere_build_tables EXPORT ${PROJECT_NAME}ExportsCore
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 
-if (MPAS_HYDRO)
+if (NUOPC)
   add_subdirectory(couple/nuopc)
 endif()
