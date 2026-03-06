@@ -45,6 +45,8 @@ module mpas_atm_nuopc
   real (kind=R8KIND) :: integ_start_time, integ_stop_time
   logical :: io_rank = .false.
 
+  character(len=ESMF_MAXSTR), parameter :: file = __FILE__
+
   ! public SetServices
   public SetVM, SetServices
 
@@ -59,8 +61,6 @@ contains
     character(80)             :: compLabel
     character(:), allocatable :: badKey
     logical                   :: isFlag
-    character(:), allocatable :: file
-    file = __FILE__
     rc = ESMF_SUCCESS
 
     ! derive from NUOPC_Model
@@ -137,7 +137,6 @@ contains
     use mpas_atmphys_vars, only: mpas_noahmp
     type(ESMF_GridComp) :: model
     integer, intent(out) :: rc
-    character(:), allocatable :: file
     ! local variables
     type(ESMF_VM) :: vm
     type(ESMF_State) :: importState, exportState
@@ -148,8 +147,6 @@ contains
     integer :: ierr
     logical :: flag
 
-
-    file = __FILE__
     rc = ESMF_SUCCESS
     call ESMF_LogWrite("MPAS: entering Advertise", ESMF_LOGMSG_INFO, rc=rc)
 
@@ -173,6 +170,8 @@ contains
 
     print *, "MPAS: rank =", rank
     if (rank == 0) io_rank = .true.
+
+
     call mpas_init(corelist, domain, external_comm=EXTERNAL_COMM_WORLD)
     call ESMF_LogWrite("MPAS: finished mpas_init", ESMF_LOGMSG_INFO, rc=rc)
     call ESMF_LogFlush(rc=rc)
@@ -196,6 +195,7 @@ contains
 
     print *, "MPAS: Exiting Advertise"
     call ESMF_LogWrite("MPAS: exiting Advertise", ESMF_LOGMSG_INFO, rc=rc)
+
   end subroutine Advertise
 
   !-----------------------------------------------------------------------------
@@ -219,11 +219,9 @@ contains
 !     real(ESMF_KIND_R8), pointer     :: fptr(:)
 !     integer                         :: clb(1), cub(1), i
 !     type(ESMF_VM)                   :: vm
-    character(:), allocatable :: file
     type(cap_field_t), allocatable, target :: field_list(:)
 
 
-    file = __FILE__
     rc = ESMF_SUCCESS
 
     call ESMF_LogWrite("MPAS: entering Realize", ESMF_LOGMSG_INFO, rc=rc)
@@ -398,8 +396,6 @@ contains
     type(ESMF_Clock) :: clock
     type(ESMF_TimeInterval) :: timeStep, duration
     type(ESMF_Time) :: startTime, currentTime, stopTime, ds_t
-    character(:), allocatable :: file
-
     character (len=strkind), pointer :: startTime_s, stopTime_s, duration_s
     integer(ESMF_KIND_I4) :: dt_i, dt_sec
 
@@ -407,7 +403,6 @@ contains
     character(len=64) :: msg
     integer :: ierr
 
-    file = __FILE__
     rc = ESMF_SUCCESS
 
     call ESMF_LogWrite("MPAS: entering SetClock", ESMF_LOGMSG_INFO, rc=rc)
@@ -462,7 +457,6 @@ contains
     msg = "ESMF stop time: " // trim(dateString)
     call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
 
-
     call ESMF_LogWrite("Should move atm_run_core_start to a P1? not in SetClock", ESMF_LOGMSG_INFO, rc=rc)
     ierr = atm_core_run_start(domain, block_ptr, dt, config_do_restart, &
          config_restart_timestamp_name, diag_start_time, diag_stop_time, &
@@ -490,7 +484,6 @@ contains
     ! type(ESMF_VM)               :: vm
     ! integer                     :: currentSsiPe
     ! character(len=160)          :: msgString
-    character(:), allocatable :: file
     integer :: ierr
 
     ! stop "DEBUGGING CLOCKS, STOPPING IN MPAS ADVANCE"
@@ -500,7 +493,6 @@ contains
     type(ESMF_Field) :: f
     real(ESMF_KIND_R8), pointer :: ptr(:)
 
-    file = __FILE__
     rc = ESMF_SUCCESS
     call ESMF_LogWrite("MPAS: Advance", ESMF_LOGMSG_INFO, rc=rc)
     call ESMF_LogFlush(rc=rc)
@@ -600,7 +592,7 @@ contains
     type(ESMF_GridComp)  :: model
     integer, intent(out) :: rc
     rc = ESMF_SUCCESS
-    call ESMF_LogWrite("call mpas_finalize", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("entering Finalize", ESMF_LOGMSG_INFO, rc=rc)
     call ESMF_LogFlush(rc=rc)
     call mpas_finalize(corelist, domain)
     call ESMF_LogWrite("finished mpas_finalize", ESMF_LOGMSG_INFO, rc=rc)
