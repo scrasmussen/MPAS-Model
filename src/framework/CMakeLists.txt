@@ -65,7 +65,7 @@ set(FRAMEWORK_LINK_LIBRARIES
         ${PROJECT_NAME}::external::ezxml
         ${IO_LIBS}
         PnetCDF::PnetCDF_Fortran
-        HDF5::HDF5 ! is this needed?
+        HDF5::HDF5 # is this needed?
         MPI::MPI_Fortran)
 
 if (MPAS_PROFILE)
