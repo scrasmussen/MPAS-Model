@@ -850,14 +850,14 @@ contains
     NoahmpIO%calculate_soil    = .false.  ! index for if do soil process
 
 #ifdef WRF_HYDRO
-    NoahmpIO%smois1_buf      = -1.0
-    NoahmpIO%smois2_buf      = -1.0
-    NoahmpIO%smois3_buf      = -1.0
-    NoahmpIO%smois4_buf      = -1.0
-    NoahmpIO%sh2o1_buf       = -1.0
-    NoahmpIO%sh2o2_buf       = -1.0
-    NoahmpIO%sh2o3_buf       = -1.0
-    NoahmpIO%sh2o4_buf       = -1.0
+    NoahmpIO%smois1_buf      = 0.0
+    NoahmpIO%smois2_buf      = 0.0
+    NoahmpIO%smois3_buf      = 0.0
+    NoahmpIO%smois4_buf      = 0.0
+    NoahmpIO%sh2o1_buf       = 0.0
+    NoahmpIO%sh2o2_buf       = 0.0
+    NoahmpIO%sh2o3_buf       = 0.0
+    NoahmpIO%sh2o4_buf       = 0.0
 
     NoahmpIO%infxsrt         = 0.0
     NoahmpIO%sfcheadrt       = 0.0
