@@ -639,11 +639,6 @@ module atm_core
       logical, pointer :: config_apply_lbcs
       type (block_type), pointer :: block_ptr
 
-      real (kind=RKIND), pointer, intent(out) :: dt
-      logical, pointer, intent(out) :: config_do_restart
-      logical, pointer, intent(out) :: config_apply_lbcs
-      type (block_type), pointer, intent(out) :: block_ptr
-
       type (MPAS_Time_Type), intent(out) :: currTime
       character(len=StrKIND), intent(out) :: timeStamp
       character (len=StrKIND), pointer, intent(out) :: config_restart_timestamp_name
