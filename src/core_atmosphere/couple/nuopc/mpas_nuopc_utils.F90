@@ -9,10 +9,6 @@ module mpas_nuopc_utils
   logical, parameter :: debug = .false.
   integer, allocatable :: gindex(:)
 
-  integer, parameter :: rk = ESMF_KIND_R8
-  integer, parameter :: ik = ESMF_KIND_I4
-  real(rk), parameter :: SHR_CONST_REARTH = 6.37122e6_rk
-
 contains
   function gridCreate(rc) result(grid)
     integer, intent(out) :: rc
@@ -30,58 +26,37 @@ contains
 
 
   function create_esmf_mesh(domain) result(mesh)
-    use mpas_derived_types, only: domain_type, mpas_pool_type, StrKIND
-    use mpas_pool_routines, only: mpas_pool_get_subpool, &
-         mpas_pool_get_dimension, mpas_pool_get_config
-
+    use mpas_derived_types, only: domain_type
     type(domain_type), intent(in)    :: domain
-    type(mpas_pool_type), pointer :: mpas_mesh
-    type(ESMF_Mesh) :: mesh, mesh_in
-    ! integer, pointer :: nCellsSolve, nSoilLevels
+    type(ESMF_Mesh) :: mesh
 
-    character(:), allocatable :: file, mesh_file
+    character(len=:), allocatable :: mpas_grid_file, scrip_mesh_file
+    type(ESMF_DistGrid) :: distgrid
     integer :: rc
     integer :: ncount, nelem
-    type(ESMF_DistGrid) :: distgrid
-    character(len=256) :: mpas_graph_file, mpas_grid_file, iomsg
 
-    file = __FILE__
     rc = ESMF_SUCCESS
 
+    ! convert mesh from mpas to scrip format
     mpas_grid_file = get_mpas_grid_filename(domain)
+    scrip_mesh_file = mpas_to_scrip_filename(mpas_grid_file)
+    call mpas_to_scrip_mesh(mpas_grid_file, scrip_mesh_file)
+
     distgrid  = get_mpas_dist_grid(domain, rc)
-    ! mesh =  mpas_to_esmf_mesh_2(distgrid, mpas_grid_file, rc)
-    ! mesh =  mpas_to_esmf_mesh_3(distgrid, mpas_grid_file, rc)
-    ! call ESMF_MeshWrite(mesh, "mpas_mesh", rc=rc)
-    ! stop "look here"
-
-
-    ! mesh =  mpas_to_esmf_mesh(distgrid, mpas_grid_file, rc)
-    ! call ESMF_MeshWrite(mesh, "mpas_mesh", rc=rc)
-    ! print *, trim(mpas_grid_file)
-
-
-    ! ! Reading in mesh file after converting frontrange.grid.nc to scrip format
-    ! ! mpas-dev.github.io/MPAS-Tools/0.24.0/_modules/mpas_tools/scrip/from_mpas.html
-    mesh_file = "foobar.scrip.nc"
-    call scrip_from_mpas(mpas_grid_file, mesh_file)
-
-    ! print *, "todo: read mesh_file name from namelist, currently ", trim(mesh_file)
-
-    ! mesh_file = "frontrange.scrip.nc"
-    mesh = ESMF_MeshCreate(filename=mesh_file, &
+    mesh = ESMF_MeshCreate(filename=scrip_mesh_file, &
          elementDistgrid=distgrid, &
          fileformat=ESMF_FILEFORMAT_SCRIP, rc=rc)
     if (check(rc, __LINE__, file)) return
 
-    call ESMF_MeshWrite(mesh, "mpas_mesh_from_scrip", rc=rc)
-    if (check(rc, __LINE__, file)) return
+    if (debug) then
+       call ESMF_MeshWrite(mesh, "mpas_mesh_from_scrip", rc=rc)
+       if (check(rc, __LINE__, file)) return
+    end if
 
     ! Get dimensions/counts
     call ESMF_MeshGet(mesh, nodeCount=ncount, elementCount=nElem, rc=rc)
     if (check(rc, __LINE__, file)) return
     print *, "MPAS: ncount=", ncount, "nelem=", nelem
-    stop "look at mesh files"
   end function create_esmf_mesh
 
   subroutine check_nf90(stat, func)
@@ -243,6 +218,18 @@ contains
     mpas_grid_file = config_block_decomp_file_prefix(:i-1) // "grid.nc"
   end function get_mpas_grid_filename
 
+  function mpas_to_scrip_filename(mpas_grid_file) result(scrip_mesh_file)
+    character(len=*), intent(in) :: mpas_grid_file
+    character(len=:), allocatable :: scrip_mesh_file
+    integer :: i
+    i = index(trim(mpas_grid_file), '.grid.nc', back=.true.)
+    if (i == 0) then
+       print *, "Error: mpas_grid_file ", trim(mpas_grid_file), &
+            " does not have .grid.nc suffix"
+       error stop "Error: mpas_grid_file in incorrect format"
+    end if
+    scrip_mesh_file = mpas_grid_file(:i-1) // ".tmp.scrip.nc"
+  end function mpas_to_scrip_filename
 
   function mpas_to_esmf_mesh_2(distGrid, mpasFile, rc) &
        result(mesh)
@@ -1080,19 +1067,21 @@ end function mpas_to_esmf_mesh_3
   !   integer :: varid
 
   !   ! input arrays
-  !   real(rk), allocatable :: latCell(:), lonCell(:)
-  !   real(rk), allocatable :: latVertex(:), lonVertex(:)
-  !   real(rk), allocatable :: areaCell(:)
-  !   integer(ik), allocatable :: verticesOnCell(:,:)
-  !   integer(ik), allocatable :: nEdgesOnCell(:)
-  !   integer(ik), allocatable :: landIceMask1d(:)
-  !   integer(ik), allocatable :: landIceMask2d(:,:)
+  !   real(ESMF_KIND_R8), allocatable :: latCell(:), lonCell(:)
+  !   real(ESMF_KIND_R8), allocatable :: latVertex(:), lonVertex(:)
+  !   real(ESMF_KIND_R8), allocatable :: areaCell(:)
+  !   integer(ESMF_KIND_I4), allocatable :: verticesOnCell(:,:)
+  !   integer(ESMF_KIND_I4), allocatable :: nEdgesOnCell(:)
+  !   integer(ESMF_KIND_I4), allocatable :: landIceMask1d(:)
+  !   integer(ESMF_KIND_I4), allocatable :: landIceMask2d(:,:)
 
   !   ! output arrays
-  !   real(rk), allocatable :: grid_corner_lat(:,:), grid_corner_lon(:,:)
-  !   real(rk), allocatable :: grid_area(:)
-  !   integer(ik), allocatable :: grid_imask(:)
-  !   integer(ik) :: grid_dims(1)
+  !   real(ESMF_KIND_R8), allocatable :: grid_corner_lat(:,:), grid_corner_lon(:,:)
+  !   real(ESMF_KIND_R8), allocatable :: grid_area(:)
+  !   integer(ESMF_KIND_I4), allocatable :: grid_imask(:)
+  !   integer(ESMF_KIND_I4) :: grid_dims(1)
+
+  ! real(ESMF_KIND_R8), parameter :: SHR_CONST_REARTH = 6.37122e6_rk
 
   !   ! output variable ids
   !   integer :: dim_grid_size, dim_grid_corners, dim_grid_rank
@@ -1101,8 +1090,8 @@ end function mpas_to_esmf_mesh_3
   !   integer :: var_grid_area, var_grid_imask, var_grid_dims
 
   !   ! attributes / helpers
-  !   real(rk) :: sphereRadius
-  !   real(rk) :: pi
+  !   real(ESMF_KIND_R8) :: sphereRadius
+  !   real(ESMF_KIND_R8) :: pi
   !   character(len=:), allocatable :: on_a_sphere
   !   integer :: attlen
   !   integer :: iCell, iVertex, lastValidVertex
@@ -1265,12 +1254,12 @@ end function mpas_to_esmf_mesh_3
 
   !   if (doLandIceMask) then
   !     if (allocated(landIceMask1d)) then
-  !       grid_imask = 1_ik - landIceMask1d
+  !       grid_imask = 1 - landIceMask1d
   !     else
-  !       grid_imask = 1_ik - landIceMask2d(1, :)
+  !       grid_imask = 1 - landIceMask2d(1, :)
   !     end if
   !   else
-  !     grid_imask = 1_ik
+  !     grid_imask = 1
   !   end if
 
   !   !---------------------------------------
@@ -1375,7 +1364,11 @@ end function mpas_to_esmf_mesh_3
   !   end subroutine check_nc
 
   ! end subroutine scrip_from_mpas
-subroutine scrip_from_mpas(mpasFile, scripFile, useLandIceMask)
+
+
+! Convert MPAS mesh to scrip format. Based on
+! mpas-dev.github.io/MPAS-Tools/0.24.0/_modules/mpas_tools/scrip/from_mpas.html
+subroutine mpas_to_scrip_mesh(mpasFile, scripFile, useLandIceMask)
   use netcdf
   use iso_fortran_env, only : real64, int32
   implicit none
@@ -1390,22 +1383,22 @@ subroutine scrip_from_mpas(mpasFile, scripFile, useLandIceMask)
   integer :: dimid, nCells, nVertices, maxVertices
   integer :: varid
 
-  real(rk), parameter :: SHR_CONST_REARTH = 6.37122e6_rk
+  real(ESMF_KIND_R8), parameter :: SHR_CONST_REARTH = 6.37122e6
 
   ! input arrays
-  real(rk), allocatable :: latCell(:), lonCell(:)
-  real(rk), allocatable :: latVertex(:), lonVertex(:)
-  real(rk), allocatable :: areaCell(:)
-  integer(ik), allocatable :: verticesOnCell(:,:)
-  integer(ik), allocatable :: nEdgesOnCell(:)
-  integer(ik), allocatable :: landIceMask1d(:)
-  integer(ik), allocatable :: landIceMask2d(:,:)
+  real(ESMF_KIND_R8), allocatable :: latCell(:), lonCell(:)
+  real(ESMF_KIND_R8), allocatable :: latVertex(:), lonVertex(:)
+  real(ESMF_KIND_R8), allocatable :: areaCell(:)
+  integer(ESMF_KIND_I4), allocatable :: verticesOnCell(:,:)
+  integer(ESMF_KIND_I4), allocatable :: nEdgesOnCell(:)
+  integer(ESMF_KIND_I4), allocatable :: landIceMask1d(:)
+  integer(ESMF_KIND_I4), allocatable :: landIceMask2d(:,:)
 
   ! output arrays
-  real(rk), allocatable :: grid_corner_lat(:,:), grid_corner_lon(:,:)
-  real(rk), allocatable :: grid_area(:)
-  integer(ik), allocatable :: grid_imask(:)
-  integer(ik) :: grid_dims(1)
+  real(ESMF_KIND_R8), allocatable :: grid_corner_lat(:,:), grid_corner_lon(:,:)
+  real(ESMF_KIND_R8), allocatable :: grid_area(:)
+  integer(ESMF_KIND_I4), allocatable :: grid_imask(:)
+  integer(ESMF_KIND_I4) :: grid_dims(1)
 
   ! output variable ids
   integer :: dim_grid_size, dim_grid_corners, dim_grid_rank
@@ -1414,8 +1407,8 @@ subroutine scrip_from_mpas(mpasFile, scripFile, useLandIceMask)
   integer :: var_grid_area, var_grid_imask, var_grid_dims
 
   ! helpers
-  real(rk) :: sphereRadius
-  real(rk) :: pi
+  real(ESMF_KIND_R8) :: sphereRadius
+  real(ESMF_KIND_R8) :: pi
   character(len=:), allocatable :: on_a_sphere
   integer :: attlen
   integer :: iCell, iVertex, lastValidVertex
@@ -1431,7 +1424,7 @@ subroutine scrip_from_mpas(mpasFile, scripFile, useLandIceMask)
   end if
   write(*,*)
 
-  pi = acos(-1.0_rk)
+  pi = acos(-1.0)
 
   stat = nf90_open(trim(mpasFile), nf90_nowrite, fin)
   call check_nc(stat, 'nf90_open('//trim(mpasFile)//')')
@@ -1501,15 +1494,15 @@ subroutine scrip_from_mpas(mpasFile, scripFile, useLandIceMask)
   stat = nf90_get_att(fin, nf90_global, 'on_a_sphere', on_a_sphere)
   call check_nc(stat, 'nf90_get_att(on_a_sphere)')
 
-  if (any(lonCell < 0.0_rk .or. lonCell > 2.0_rk*pi)) then
+  if (any(lonCell < 0.0 .or. lonCell > 2.0*pi)) then
     error stop 'lonCell is not in the desired range (0, 2pi)'
   end if
 
-  if (any(lonVertex < 0.0_rk .or. lonVertex > 2.0_rk*pi)) then
+  if (any(lonVertex < 0.0 .or. lonVertex > 2.0*pi)) then
     error stop 'lonVertex is not in the desired range (0, 2pi)'
   end if
 
-  if (sphereRadius <= 0.0_rk) then
+  if (sphereRadius <= 0.0) then
     sphereRadius = SHR_CONST_REARTH
     write(*,'(A,ES24.16)') ' -- WARNING: sphereRadius<=0 so setting sphereRadius = ', &
                             SHR_CONST_REARTH
@@ -1544,31 +1537,31 @@ subroutine scrip_from_mpas(mpasFile, scripFile, useLandIceMask)
   allocate(grid_area(nCells))
   allocate(grid_imask(nCells))
 
-  ! grid_corner_lat = 0.0_rk
-  ! grid_corner_lon = 0.0_rk
+  ! grid_corner_lat = 0.0
+  ! grid_corner_lon = 0.0
   grid_area = areaCell / (sphereRadius*sphereRadius)
   grid_dims(1) = nCells
 
 
-allocate(grid_corner_lat(maxVertices, nCells))
-allocate(grid_corner_lon(maxVertices, nCells))
+  allocate(grid_corner_lat(maxVertices, nCells))
+  allocate(grid_corner_lon(maxVertices, nCells))
 
-grid_corner_lat = 0.0_rk
-grid_corner_lon = 0.0_rk
+  grid_corner_lat = 0.0
+  grid_corner_lon = 0.0
 
-do iCell = 1, nCells
-  lastValidVertex = verticesOnCell(nEdgesOnCell(iCell), iCell)
+  do iCell = 1, nCells
+     lastValidVertex = verticesOnCell(nEdgesOnCell(iCell), iCell)
 
-  do iVertex = 1, maxVertices
-    if (iVertex <= nEdgesOnCell(iCell)) then
-      grid_corner_lat(iVertex, iCell) = latVertex(verticesOnCell(iVertex, iCell))
-      grid_corner_lon(iVertex, iCell) = lonVertex(verticesOnCell(iVertex, iCell))
-    else
-      grid_corner_lat(iVertex, iCell) = latVertex(lastValidVertex)
-      grid_corner_lon(iVertex, iCell) = lonVertex(lastValidVertex)
-    end if
+     do iVertex = 1, maxVertices
+        if (iVertex <= nEdgesOnCell(iCell)) then
+           grid_corner_lat(iVertex, iCell) = latVertex(verticesOnCell(iVertex, iCell))
+           grid_corner_lon(iVertex, iCell) = lonVertex(verticesOnCell(iVertex, iCell))
+        else
+           grid_corner_lat(iVertex, iCell) = latVertex(lastValidVertex)
+           grid_corner_lon(iVertex, iCell) = lonVertex(lastValidVertex)
+        end if
+     end do
   end do
-end do
 
 
   ! do iCell = 1, nCells
@@ -1587,15 +1580,14 @@ end do
 
   if (doLandIceMask) then
     if (allocated(landIceMask1d)) then
-      grid_imask = 1_ik - landIceMask1d
+      grid_imask = 1 - landIceMask1d
     else
-      grid_imask = 1_ik - landIceMask2d(1,:)
+      grid_imask = 1 - landIceMask2d(1,:)
     end if
   else
-    grid_imask = 1_ik
+    grid_imask = 1
   end if
 
-  ! Changed from classic output to NetCDF-4/HDF5 output
   stat = nf90_create(trim(scripFile), ior(nf90_clobber, nf90_netcdf4), &
        fout, &
        comm=MPI_COMM_WORLD,                                      &
@@ -1619,15 +1611,12 @@ end do
   stat = nf90_put_att(fout, var_grid_center_lon, 'units', 'radians')
   call check_nc(stat, 'nf90_put_att(grid_center_lon:units)')
 
-  ! stat = nf90_def_var(fout, 'grid_corner_lat', nf90_double, (/dim_grid_size,&
-  !      & dim_grid_corners/), var_grid_corner_lat)
   stat = nf90_def_var(fout, 'grid_corner_lat', nf90_double, &
        &(/dim_grid_corners,dim_grid_size /), var_grid_corner_lat)
   call check_nc(stat, 'nf90_def_var(grid_corner_lat)')
   stat = nf90_put_att(fout, var_grid_corner_lat, 'units', 'radians')
   call check_nc(stat, 'nf90_put_att(grid_corner_lat:units)')
 
-  ! stat = nf90_def_var(fout, 'grid_corner_lon', nf90_double, (/dim_grid_size, dim_grid_corners/), var_grid_corner_lon)
   stat = nf90_def_var(fout, 'grid_corner_lon', nf90_double, &
        &(/dim_grid_corners,dim_grid_size/), var_grid_corner_lon)
   call check_nc(stat, 'nf90_def_var(grid_corner_lon)')
@@ -1681,6 +1670,6 @@ contains
     end if
   end subroutine check_nc
 
-end subroutine scrip_from_mpas
+end subroutine mpas_to_scrip_mesh
 
 end module mpas_nuopc_utils

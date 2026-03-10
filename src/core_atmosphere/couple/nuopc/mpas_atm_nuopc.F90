@@ -4,8 +4,7 @@ module mpas_atm_nuopc
   use mpas_derived_types, only: core_type, domain_type, block_type, &
        mpas_pool_type, mpas_time_type
   use mpas_kind_types, only: rkind, r8kind, strkind
-  use mpas_nuopc_utils, only: check, printa, gridCreate, &
-       create_esmf_mesh
+  use mpas_nuopc_utils, only: check, printa, gridCreate
   use mpas_subdriver, only: mpas_init, mpas_run, mpas_finalize
   use atm_core, only: atm_core_run_start, atm_core_run_advance
   use esmf
@@ -22,7 +21,6 @@ module mpas_atm_nuopc
   ! mpas_init arguments
   type (core_type), pointer :: corelist => null()
   type (domain_type), pointer :: domain => null()
-
 
   ! mpas atm_core_run_start variables
   type (block_type), pointer :: block
