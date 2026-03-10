@@ -268,16 +268,8 @@ contains
        mesh_esmf = create_esmf_mesh(domain)
        mesh_esmf_initialized = .true.
     else
-       stop "Realize should be only called once" ! remove this if else statement?
+       stop "mesh_esmf should be only created once"
     end if
-
-    ! ! Read in mesh rather than create it, just easier
-    ! mesh_file = "x1.40962.esmf.nc"
-    ! mesh_esmf = ESMF_MeshCreate(filename=mesh_file,
-    ! fileformat=ESMF_FILEFORMAT_ESMFMESH, rc=rc)
-    ! if (check(rc, __LINE__, file)) return
-    ! print *, "Read in mesh file: ", mesh_file
-    ! call ESMF_LogWrite("Read in " // mesh_file, ESMF_LOGMSG_INFO, rc=rc)
 
     call ESMF_MeshGet(mesh_esmf, nodeCount=numNodes, &
          elementCount=numElements, rc=rc)
@@ -285,21 +277,7 @@ contains
     if (debug) print *, "Mesh node count: ", numNodes
 
 
-    ! stop "halt and catch fire"
-
-    ! ! Create Fields
-    ! import_field = ESMF_FieldCreate(mesh_esmf, typekind=ESMF_TYPEKIND_R8, &
-    !      meshloc=ESMF_MESHLOC_ELEMENT, name='temperature', rc=rc)
-    ! if (check(rc, __LINE__, file)) return
-    ! print *, "Fields created"
-    ! ! Access pointer to underlying data array
-    ! call ESMF_FieldGet(import_field, farrayPtr=fptr, rc=rc)
-    ! nSoilLevels = 4
-    ! ! Initialize field values
-    ! fptr = 300.0d0   ! e.g., initialize temperature field to 300K
-
-    ! Create field bundle
-
+    ! ! Create field bundle example
     ! windField = ESMF_FieldCreate(mpas_mesh, typekind=ESMF_TYPEKIND_R8, name='wind', rc=rc)
     ! ! Create FieldBundle and add Fields
     ! call ESMF_FieldBundleCreate(stateBundle, mpas_mesh, rc=rc)
@@ -313,12 +291,8 @@ contains
 
     call ESMF_StateLog(importState, logMsgFlag=ESMF_LOGMSG_INFO, rc=rc)
     call ESMF_StateLog(exportState, logMsgFlag=ESMF_LOGMSG_INFO, rc=rc)
-    ! stop "MPAS: in realize printing states"
 
     do n=lbound(fieldList,1), ubound(fieldList,1)
-      ! print *, "field ", trim(fieldList(n)%st_name), &
-      !      "import ", fieldList(n)%ad_import
-
        ! check realize import
       if (fieldList(n)%ad_import) then
         if (realizeAllImport) then
