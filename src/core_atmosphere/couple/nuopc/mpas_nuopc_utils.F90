@@ -34,13 +34,18 @@ contains
     type(ESMF_DistGrid) :: distgrid
     integer :: rc
     integer :: ncount, nelem
+    logical :: exists
 
     rc = ESMF_SUCCESS
 
     ! convert mesh from mpas to scrip format
     mpas_grid_file = get_mpas_grid_filename(domain)
     scrip_mesh_file = mpas_to_scrip_filename(mpas_grid_file)
-    call mpas_to_scrip_mesh(mpas_grid_file, scrip_mesh_file)
+
+    inquire(file=trim(scrip_mesh_file), exist=exists)
+    if (.not. exists) then
+       call mpas_to_scrip_mesh(mpas_grid_file, scrip_mesh_file)
+    end if
 
     distgrid  = get_mpas_dist_grid(domain, rc)
     mesh = ESMF_MeshCreate(filename=scrip_mesh_file, &
