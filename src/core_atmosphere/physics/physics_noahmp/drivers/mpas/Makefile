@@ -7,6 +7,10 @@ all: dummy driver
 dummy:
 	echo "****** compiling physics_noahmp/drivers ******"
 
+ifneq ($(filter ON on TRUE true 1,$(HYDRO)),)
+  override FFLAGS += -DWRF_HYDRO
+endif
+
 OBJS =  NoahmpSnowInitMod.o \
 	NoahmpInitMainMod.o \
 	NoahmpDriverMainMod.o \
@@ -71,4 +75,3 @@ clean:
 
 .F90.o:
 	$(FC) $(CPPFLAGS) $(COREDEF) $(FFLAGS) -c $*.F90 $(CPPINCLUDES) $(FCINCLUDES) -I. -I../../utility -I../../src -I../../../../../framework $(MPAS_ESMF_INC)
-

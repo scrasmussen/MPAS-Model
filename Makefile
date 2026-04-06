@@ -688,6 +688,14 @@ MPAS_PREFIX ?= $(CURDIR)
 MPAS_LIBDIR ?= $(MPAS_PREFIX)/lib
 MPAS_MODDIR ?= $(MPAS_PREFIX)/mod
 
+HYDRO ?= false
+ifneq ($(filter ON on TRUE true 1,$(HYDRO)),)
+  NUOPC := true
+  HYDRO_MESSAGE := "MPAS was built with Hydro."
+else
+  HYDRO_MESSAGE := "MPAS was built without Hydro."
+endif
+
 NUOPC  ?= false
 ifeq ($(NUOPC), true)
 MPAS_ESMF = external
@@ -1600,6 +1608,7 @@ endif
 	@echo $(IO_MESSAGE)
 	@echo $(ESMF_MESSAGE)
 	@echo $(NUOPC_MESSAGE)
+	@echo $(HYDRO_MESSAGE)
 	@echo "*******************************************************************************"
 clean:
 	cd src; $(MAKE) clean RM="$(RM)" CORE="$(CORE)" AUTOCLEAN="$(AUTOCLEAN)" NUOPC="$(NUOPC)"
@@ -1669,4 +1678,3 @@ errmsg:
 ifdef CORE
 	exit 1
 endif
-
