@@ -618,7 +618,6 @@ contains
     NoahmpIO%mp_graup        = 0.0
     NoahmpIO%mp_hail         = 0.0
     NoahmpIO%sfcrunoff       = 0.0
-    NoahmpIO%sfcheadrt       = 0.0
     NoahmpIO%udrunoff        = 0.0
 
     ! additional output
