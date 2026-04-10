@@ -618,7 +618,7 @@ module atm_core
       type (domain_type), intent(inout) :: domain
       integer :: ierr
 
-      real (kind=RKIND) :: dt
+      real (kind=RKIND), intent(out) :: dt
       logical, pointer :: config_do_restart
       logical, pointer :: config_apply_lbcs
       type (block_type), pointer :: block_ptr
@@ -765,7 +765,7 @@ module atm_core
       integer, intent(inout) :: stream_dir
       real (kind=R8KIND), intent(inout) :: integ_start_time, integ_stop_time
       real (kind=R8KIND), intent(inout) :: diag_start_time, diag_stop_time
-      real (kind=RKIND), pointer, intent(inout) :: dt
+      real (kind=RKIND), intent(inout) :: dt
       integer, intent(inout) :: itimestep
       type (mpas_pool_type), pointer, intent(inout) :: state, mesh
       type (mpas_pool_type), pointer, intent(inout) :: diag, diag_physics
@@ -947,7 +947,7 @@ module atm_core
       type (domain_type), intent(inout) :: domain
       integer :: ierr
 
-      real (kind=RKIND), pointer :: dt
+      real (kind=RKIND) :: dt
       logical, pointer :: config_do_restart
       logical, pointer :: config_apply_lbcs
       type (block_type), pointer :: block_ptr
@@ -978,7 +978,7 @@ module atm_core
       ! During integration, time level 1 stores the model state at the beginning of the
       !   time step, and time level 2 stores the state advanced dt in time by timestep(...)
       do while (.not. mpas_is_clock_stop_time(clock))
-         print *, "Advancing: itimestep =", itimestep
+         ! print *, "Advancing: itimestep =", itimestep
          ierr = atm_core_run_advance(domain, timestamp, block_ptr, &
               config_apply_lbcs, input_start_time, &
               input_stop_time, output_start_time, output_stop_time, &
