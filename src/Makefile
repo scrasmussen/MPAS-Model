@@ -14,6 +14,7 @@ endif
 all: $(BUILD_ALL)
 
 mpas: $(AUTOCLEAN_DEPS) externals frame ops dycore drver
+	cp framework/*.mod $(MPAS_MODDIR)/.
 	$(LINKER) $(LDFLAGS) -o $(EXE_NAME) driver/*.o -L. -ldycore -lops -lframework $(LIBS) $(MPAS_ESMF_INC) $(MPAS_ESMF_LIB)
 
 externals: $(AUTOCLEAN_DEPS)

@@ -12,4 +12,5 @@ clean:
 
 %.o: %.F90
 	$(RM) $@ $*.mod
-	$(FC) $(CPPFLAGS) $(PHYSICS) $(FFLAGS) -c $< -o $@ $(CPPINCLUDES) $(FCINCLUDES) $(MPAS_ESMF_INC)
+	echo "-IMPAS_MODDIR = -I$(MPAS_MODDIR)"
+	$(FC) $(CPPFLAGS) $(PHYSICS) $(FFLAGS) -c $< -o $@ -I$(MPAS_MODDIR) $(CPPINCLUDES) $(FCINCLUDES) $(MPAS_ESMF_INC)

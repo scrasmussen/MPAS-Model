@@ -16,11 +16,11 @@ gnu:   # BUILDTARGET GNU Fortran, C, and C++ compilers
 	"CC_SERIAL = gcc" \
 	"CXX_SERIAL = g++" \
 	"FFLAGS_PROMOTION = -fdefault-real-8 -fdefault-double-8" \
-	"FFLAGS_OPT = -std=f2008 -fimplicit-none -O3 -ffree-line-length-none -fconvert=big-endian -ffree-form" \
+	"FFLAGS_OPT = -std=f2008 -fimplicit-none -O3 -ffree-line-length-none -fconvert=big-endian -ffree-form -fallow-argument-mismatch" \
 	"CFLAGS_OPT = -O3" \
 	"CXXFLAGS_OPT = -O3" \
 	"LDFLAGS_OPT = -O3" \
-	"FFLAGS_DEBUG = -std=f2008 -fimplicit-none -g -ffree-line-length-none -fconvert=big-endian -ffree-form -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow" \
+	"FFLAGS_DEBUG = -std=f2008 -fimplicit-none -g -ffree-line-length-none -fconvert=big-endian -ffree-form -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -fallow-argument-mismatch" \
 	"CFLAGS_DEBUG = -g" \
 	"CXXFLAGS_DEBUG = -g" \
 	"LDFLAGS_DEBUG = -g" \
@@ -689,11 +689,16 @@ MPAS_LIBDIR ?= $(MPAS_PREFIX)/lib
 MPAS_MODDIR ?= $(MPAS_PREFIX)/mod
 
 NUOPC  ?= false
+ifneq ($(filter ON 1,$(NUOPC)),)
+  override NUOPC := true
+endif
 ifeq ($(NUOPC), true)
-MPAS_ESMF = external
-NUOPC_MESSAGE="MPAS was built with NUOPC cap libraries."
+  MPAS_ESMF = external
+  MPAS_USE_MPI_F08:=0
+  FCINCLUDES += -I$(CURDIR)/src/core_atmosphere/ -I$(CURDIR)/src/driver/
+  NUOPC_MESSAGE="MPAS was built with NUOPC cap libraries."
 else
-NUOPC_MESSAGE="MPAS was built without NUOPC cap libraries."
+  NUOPC_MESSAGE="MPAS was built without NUOPC cap libraries."
 endif
 
 export MPAS_ESMF ?= embedded
@@ -1399,10 +1404,11 @@ mpi_f08_test:
 	@#
 	@# MPAS_MPI_F08 will be set to:
 	@#  0 if no mpi_f08 module support was detected
+	@#  0 if NUOPC is turned on
 	@#  1 if the MPI library provides an mpi_f08 module
 	@#
 	$(info Checking for mpi_f08 support...)
-	$(eval MPAS_MPI_F08 := $(shell $\
+	$(eval MPAS_MPI_F08 := $(if $(filter true,$(NUOPC)),0,$(shell \
 		printf "program main\n$\
 		        &   use mpi_f08, only : MPI_Init, MPI_Comm, MPI_INTEGER, MPI_Datatype\n$\
 		        &   integer :: ierr\n$\
@@ -1419,7 +1425,7 @@ mpi_f08_test:
 		else $\
 		    printf "0"; $\
 		fi $\
-	))
+	)))
 	$(if $(findstring 0,$(MPAS_MPI_F08)), $(eval MPI_F08_MESSAGE = "Using the mpi module."), )
 	$(if $(findstring 0,$(MPAS_MPI_F08)), $(info No working mpi_f08 module detected; using mpi module.))
 	$(if $(findstring 1,$(MPAS_MPI_F08)), $(eval override CPPFLAGS += -DMPAS_USE_MPI_F08), )
