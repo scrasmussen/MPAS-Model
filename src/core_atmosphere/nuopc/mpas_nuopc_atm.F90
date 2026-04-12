@@ -92,6 +92,7 @@ module mpas_nuopc_atm
 
   subroutine Advertise(model, rc)
     !> Advertise available export fields and desired import fields
+    use mpas_subdriver, only: mpas_init
 
     ! arguments
     type(ESMF_GridComp)  :: model
@@ -148,6 +149,7 @@ module mpas_nuopc_atm
   subroutine SetClock(model, rc)
     !> Adjust model clock and time step during initialization
     use atm_core, only: atm_core_run_start
+    use mpas_pool_routines, only: mpas_pool_get_config
 
     ! arguments
     type(ESMF_GridComp)  :: model
