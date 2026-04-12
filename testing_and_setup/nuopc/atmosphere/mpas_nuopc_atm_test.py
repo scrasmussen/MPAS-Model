@@ -93,7 +93,7 @@ class MPASBuild:
 
     def build(self):
         """Build MPAS Atmosphere with NUOPC support."""
-
+        print(f'$ make {self.compiler} -j {self.bldtsks} CORE="atmosphere" NUOPC="true"')
         return run_command(
             f'make {self.compiler} -j {self.bldtsks} CORE="atmosphere" NUOPC="true"',
             self.buildroot,
@@ -127,6 +127,7 @@ class ESMXBuild:
     def build(self):
         """Build ESMX executable using ESMX_Builder."""
 
+        print(f'$ ESMX_Builder {self.esmxcfg}',)
         return run_command(
             f'ESMX_Builder {self.esmxcfg}',
             self.buildroot,
