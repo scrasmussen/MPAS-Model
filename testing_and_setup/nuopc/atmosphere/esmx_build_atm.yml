@@ -1,5 +1,7 @@
 application:
   exe_name: esmx_mpas
+  cmake_build_args: -DCMAKE_PREFIX_PATH=${NCAR_LDFLAGS_PARALLELIO}
+  link_libraries: piof, pioc
 
 components:
 

@@ -43,7 +43,17 @@ dycore: $(AUTOCLEAN_DEPS) build_tools externals frame ops
 
 nuopc_lib: mpas
 	( cd core_$(CORE); $(MAKE) CPPFLAGS="$(CPPFLAGS)" CPPINCLUDES="$(CPPINCLUDES)" FFLAGS="$(FFLAGS)" FCINCLUDES="$(FCINCLUDES)" nuopc )
-	ar -ru $(MPAS_LIBDIR)/libmpas_nuopc.a libframework.a libops.a libdycore.a core_$(CORE)/nuopc/*.o
+	ar rcs $(MPAS_LIBDIR)/libmpas_nuopc.a \
+		core_atmosphere/nuopc/*.o \
+		core_atmosphere/libphys/*.o \
+		core_atmosphere/*.o \
+		core_atmosphere/diagnostics/*.o \
+		core_atmosphere/libchem/*.o \
+		core_atmosphere/dynamics/*.o \
+		driver/*.o \
+		framework/*o \
+		operators/*o \
+		external/ezxml/*o
 	ranlib $(MPAS_LIBDIR)/libmpas_nuopc.a
 	cp core_$(CORE)/nuopc/*.mod $(MPAS_MODDIR)/.
 
