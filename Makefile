@@ -1669,4 +1669,3 @@ errmsg:
 ifdef CORE
 	exit 1
 endif
-
