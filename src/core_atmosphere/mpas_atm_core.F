@@ -634,7 +634,7 @@ module atm_core
       type (domain_type), intent(inout) :: domain
       integer :: ierr
 
-      real (kind=RKIND) :: dt
+      real (kind=RKIND), intent(out) :: dt
       logical, pointer :: config_do_restart
       logical, pointer :: config_apply_lbcs
       type (block_type), pointer :: block_ptr
@@ -781,7 +781,7 @@ module atm_core
       integer, intent(inout) :: stream_dir
       real (kind=R8KIND), intent(inout) :: integ_start_time, integ_stop_time
       real (kind=R8KIND), intent(inout) :: diag_start_time, diag_stop_time
-      real (kind=RKIND), pointer, intent(inout) :: dt
+      real (kind=RKIND), intent(inout) :: dt
       integer, intent(inout) :: itimestep
       type (mpas_pool_type), pointer, intent(inout) :: state, mesh
       type (mpas_pool_type), pointer, intent(inout) :: diag, diag_physics
@@ -963,7 +963,7 @@ module atm_core
       type (domain_type), intent(inout) :: domain
       integer :: ierr
 
-      real (kind=RKIND), pointer :: dt
+      real (kind=RKIND) :: dt
       logical, pointer :: config_do_restart
       logical, pointer :: config_apply_lbcs
       type (block_type), pointer :: block_ptr
