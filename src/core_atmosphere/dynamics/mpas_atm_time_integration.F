@@ -207,7 +207,7 @@ module atm_time_integration
 
       type (domain_type), intent(inout) :: domain
 
-#ifdef MPAS_CAM_DYCORE
+#if defined(MPAS_CAM_DYCORE) || defined(MPAS_UFS_DYCORE)
       ! Used in allocating scratch fields for physics tendencies
       type (mpas_pool_type), pointer :: tend_physics
       type (field2DReal), pointer :: tend_ru_physicsField, tend_rtheta_physicsField, tend_rho_physicsField
@@ -273,7 +273,7 @@ module atm_time_integration
       real (kind=RKIND), dimension(:), pointer :: meshScalingDel4
 #endif
 
-#ifdef MPAS_CAM_DYCORE
+#if defined(MPAS_CAM_DYCORE) || defined(MPAS_UFS_DYCORE)
       nullify(tend_physics)
       call mpas_pool_get_subpool(domain % blocklist % structs, 'tend_physics', tend_physics)
 
@@ -285,6 +285,17 @@ module atm_time_integration
 
       call mpas_pool_get_field(tend_physics, 'tend_ru_physics', tend_ru_physicsField)
       call mpas_allocate_scratch_field(tend_ru_physicsField)
+#ifdef MPAS_UFS_DYCORE
+      !
+      ! Under UFS these fields persist for the whole run: the UFS coupling layer
+      ! (atmos_coupling.F90::ufs_physics_to_mpas) overwrites tend_ru_physics before
+      ! every dynamics step, while tend_rtheta_physics and tend_rho_physics are not
+      ! (yet) used and must stay zero.
+      !
+      tend_rtheta_physicsField % array(:,:) = 0.0_RKIND
+      tend_rho_physicsField % array(:,:) = 0.0_RKIND
+      tend_ru_physicsField % array(:,:) = 0.0_RKIND
+#endif
 #endif
 
 #ifdef MPAS_OPENACC
@@ -481,7 +492,7 @@ module atm_time_integration
 
       type (domain_type), intent(inout) :: domain
 
-#ifdef MPAS_CAM_DYCORE
+#if defined(MPAS_CAM_DYCORE) || defined(MPAS_UFS_DYCORE)
       ! Used in allocating scratch fields for physics tendencies
       type (mpas_pool_type), pointer :: tend_physics
       type (field2DReal), pointer :: tend_ru_physicsField, tend_rtheta_physicsField, tend_rho_physicsField
@@ -548,7 +559,7 @@ module atm_time_integration
 #endif
 
 
-#ifdef MPAS_CAM_DYCORE
+#if defined(MPAS_CAM_DYCORE) || defined(MPAS_UFS_DYCORE)
       nullify(tend_physics)
       call mpas_pool_get_subpool(domain % blocklist % structs, 'tend_physics', tend_physics)
 
@@ -874,7 +885,7 @@ module atm_time_integration
       real (kind=RKIND), dimension(:,:), pointer :: rqvdynten, rthdynten, theta_m
       real (kind=RKIND) :: theta_local, fac_m
 
-#ifndef MPAS_CAM_DYCORE
+#if !defined(MPAS_CAM_DYCORE) && !defined(MPAS_UFS_DYCORE)
       ! Used in allocating scratch fields for physics tendencies
       type (field2DReal), pointer :: tend_ru_physicsField, tend_rtheta_physicsField, tend_rho_physicsField
 #endif
@@ -971,7 +982,7 @@ module atm_time_integration
       end do
       !$acc end parallel
 
-#ifndef MPAS_CAM_DYCORE
+#if !defined(MPAS_CAM_DYCORE) && !defined(MPAS_UFS_DYCORE)
       call mpas_pool_get_field(tend_physics, 'tend_rtheta_physics', tend_rtheta_physicsField)
       call mpas_allocate_scratch_field(tend_rtheta_physicsField)
 
@@ -1083,7 +1094,7 @@ module atm_time_integration
                              exchange_halo_group )
       call mpas_timer_stop('physics_get_tend')
 #else
-#ifndef MPAS_CAM_DYCORE
+#if !defined(MPAS_CAM_DYCORE) && !defined(MPAS_UFS_DYCORE)
       !
       ! If no physics are being used, simply zero-out the physics tendency fields
       !
@@ -1531,7 +1542,7 @@ module atm_time_integration
 
       deallocate(qtot)  !  we are finished with these now
 
-#ifndef MPAS_CAM_DYCORE
+#if !defined(MPAS_CAM_DYCORE) && !defined(MPAS_UFS_DYCORE)
       call mpas_deallocate_scratch_field(tend_rtheta_physicsField)
       call mpas_deallocate_scratch_field(tend_rho_physicsField)
       call mpas_deallocate_scratch_field(tend_ru_physicsField)
