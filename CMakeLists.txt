@@ -27,6 +27,10 @@ option(MPAS_USE_PIO "Build with PIO I/O library" OFF)
 option(MPAS_HYDRO "Enable MPAS-Hydro" OFF)
 option(NUOPC "Enable NUOPC" OFF)
 
+if(MPAS_HYDRO)
+    set(NUOPC ON)
+endif()
+
 message(STATUS "[OPTION] MPAS_CORES: ${MPAS_CORES}")
 message(STATUS "[OPTION] MPAS_DOUBLE_PRECISION: ${MPAS_DOUBLE_PRECISION}")
 message(STATUS "[OPTION] MPAS_PROFILE: ${MPAS_PROFILE}")
@@ -127,7 +131,12 @@ endif()
 if(ESMF_FOUND)
   message(STATUS "Configure MPAS for external ESMF")
   if(NUOPC)
-      add_definitions(-DMPAS_EXTERNAL_ESMF_LIB)
+    add_definitions(
+      -DMPAS_EXTERNAL_ESMF_LIB
+      -DMPAS_NO_ESMF_FINALIZE
+    )
+    #-DMPAS_NO_ESMF_INIT leads to error
+    # ESMF_LogWrite(): ESMF_Log not open -- cannot ESMF_LogWrite().  Log message = Wrong argument specified  - , need real calendar.
   else()
     add_definitions(-DMPAS_EXTERNAL_ESMF_LIB -DMPAS_NO_ESMF_INIT)
   endif()
